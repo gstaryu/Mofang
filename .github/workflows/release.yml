@@ -1,0 +1,60 @@
+name: Build & Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-exe:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pyinstaller
+
+      - name: Build exe (PyInstaller)
+        run: >
+          pyinstaller --noconfirm --windowed --name Mofang
+          --add-data "data;data"
+          --add-data "server/web;server/web"
+          --collect-all webview
+          desktop/main.py
+
+      - name: Pack
+        shell: pwsh
+        run: |
+          $zip = "Mofang-$env:GITHUB_REF_NAME-windows-x64.zip"
+          Compress-Archive -Path "dist/Mofang/*" -DestinationPath $zip
+          "ZIP=$zip" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.ZIP }}
+          generate_release_notes: true
+          body: |
+            ## 墨仿 Mofang ${{ github.ref_name }}
+
+            把打印体变成自然手写的本地工具。本压缩包为 **Windows x64 免安装版**，解压后运行 `Mofang.exe` 即可，无需安装 Python。
+
+            ### 📦 安装说明
+            1. 下载下方附件并解压到任意可写目录（首次运行会在程序目录生成 `data/` 文件夹）；
+            2. 双击 `Mofang.exe`（若被 SmartScreen 拦截，点"更多信息 → 仍要运行"）；
+            3. 打印导出的 PDF 时请选择 **"实际大小 / 100%"** 以对齐实体稿纸。
+
+            ### 📋 使用说明
+            完整使用文档见仓库 [docs/用户文档.md](https://github.com/gstaryu/Mofang/blob/master/docs/用户文档.md)。
+
+            > ⚠️ 仅供学习交流，请勿用于提交作业等需要真实手写的场合。

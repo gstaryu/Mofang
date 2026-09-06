@@ -1,0 +1,241 @@
+/* 墨仿 Mofang — 纸墨设计系统（基于 ui-ux-pro-max 向导模式 + 文具美学调色） */
+:root {
+  --paper: #faf7f0;
+  --paper-2: #f3eee2;
+  --card: #fffdf8;
+  --ink: #2f2a26;
+  --ink-soft: #6b6259;
+  --cinnabar: #b03a2e;
+  --cinnabar-dark: #8f2d23;
+  --border: #e4dccd;
+  --ok: #3e7a4e;
+  --warn: #a06a00;
+  --radius: 12px;
+  --shadow: 0 2px 10px rgba(60, 50, 30, .08);
+  --shadow-lg: 0 6px 24px rgba(60, 50, 30, .14);
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Noto Serif SC", "Songti SC", "SimSun", serif;
+  font-size: 16px;
+  line-height: 1.6;
+  min-height: 100dvh;
+}
+button { font-family: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--cinnabar); outline-offset: 2px; border-radius: 4px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* ---------- 顶栏 ---------- */
+.topbar {
+  display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between;
+  padding: 14px 28px; background: var(--card); border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 10;
+}
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand-mark {
+  display: grid; place-items: center; width: 44px; height: 44px;
+  background: var(--ink); color: var(--paper); border-radius: 10px;
+  font-size: 26px; font-family: "Ma Shan Zheng", "KaiTi", cursive;
+}
+.brand h1 { margin: 0; font-size: 20px; letter-spacing: 2px; }
+.brand .en { color: var(--ink-soft); font-size: 14px; font-weight: 400; }
+.tagline { margin: 0; font-size: 12px; color: var(--ink-soft); }
+
+.steps { display: flex; gap: 6px; flex-wrap: wrap; }
+.step {
+  display: flex; align-items: center; gap: 7px;
+  border: 1px solid var(--border); background: transparent; color: var(--ink-soft);
+  padding: 8px 14px; border-radius: 999px; font-size: 14px; transition: all .2s ease;
+}
+.step i {
+  font-style: normal; width: 22px; height: 22px; border-radius: 50%;
+  display: grid; place-items: center; background: var(--paper-2); font-size: 12px;
+}
+.step:hover { border-color: var(--cinnabar); color: var(--ink); }
+.step.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.step.active i { background: var(--cinnabar); color: #fff; }
+.step.done i { background: var(--ok); color: #fff; }
+
+/* ---------- 主体 ---------- */
+main { max-width: 1240px; margin: 0 auto; padding: 14px 20px 90px; }
+.panel h2 { font-size: 20px; margin: 2px 0 8px; letter-spacing: 1px; }
+
+/* ---------- 按钮 ---------- */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 20px; border-radius: var(--radius); font-size: 15px;
+  border: 1px solid transparent; transition: all .18s ease;
+}
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn-primary { background: var(--cinnabar); color: #fff; }
+.btn-primary:hover:not(:disabled) { background: var(--cinnabar-dark); }
+.btn-ghost { background: var(--card); border-color: var(--border); color: var(--ink); }
+.btn-ghost:hover:not(:disabled) { border-color: var(--cinnabar); color: var(--cinnabar); }
+
+/* ---------- 步骤 1 模板 ---------- */
+.tpl-grid, .font-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; }
+.tpl-card, .font-card {
+  background: var(--card); border: 2px solid var(--border); border-radius: var(--radius);
+  padding: 10px; text-align: center; cursor: pointer; transition: all .18s ease; position: relative;
+}
+.tpl-card:hover, .font-card:hover { border-color: var(--ink-soft); box-shadow: var(--shadow); }
+.tpl-card.selected, .font-card.selected { border-color: var(--cinnabar); box-shadow: var(--shadow-lg); }
+.tpl-card.selected::after, .font-card.selected::after {
+  content: "✓"; position: absolute; top: 8px; right: 10px; color: var(--cinnabar); font-weight: 700;
+}
+.tpl-card img { width: 100%; height: 110px; object-fit: cover; border-radius: 6px; background: var(--paper-2); }
+.tpl-card .name, .font-card .name { display: block; margin-top: 8px; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.font-card .sample { font-size: 34px; line-height: 1.4; height: 52px; display: flex; align-items: center; justify-content: center; }
+.tpl-del {
+  position: absolute; bottom: 8px; right: 8px; border: none; background: rgba(0,0,0,.45);
+  color: #fff; width: 24px; height: 24px; border-radius: 6px; font-size: 12px; display: none;
+}
+.tpl-adjust {
+  position: absolute; bottom: 8px; right: 38px; border: none; background: rgba(176,58,46,.9);
+  color: #fff; width: 44px; height: 24px; border-radius: 6px; font-size: 12px; display: none;
+  cursor: pointer;
+}
+.tpl-card:hover .tpl-del { display: block; }
+.tpl-card:hover .tpl-adjust { display: block; }
+.row-actions { margin: 16px 0; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.hint { color: var(--ink-soft); font-size: 13px; }
+
+/* ---------- 标注器 ---------- */
+.annotator { margin-top: 20px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; }
+.annotator h3 { margin: 0 0 12px; font-size: 16px; }
+.annotator h3 small { color: var(--warn); font-weight: 400; }
+.annot-canvas-wrap { text-align: center; margin-bottom: 14px; }
+#annotCanvas { max-width: 100%; border: 1px solid var(--border); border-radius: 6px; cursor: crosshair; touch-action: manipulation; }
+.annot-form { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-end; }
+.field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--ink-soft); }
+.field input { width: 90px; padding: 8px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: var(--paper); color: var(--ink); }
+.annot-actions { margin-left: auto; display: flex; gap: 10px; }
+
+/* ---------- 步骤 3 编辑器 ---------- */
+.editor-layout { display: grid; grid-template-columns: 1.2fr 1fr; gap: 22px; }
+@media (max-width: 860px) { .editor-layout { grid-template-columns: 1fr; } }
+.editor-left label { font-size: 14px; color: var(--ink-soft); }
+#textInput {
+  width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius);
+  font-family: inherit; font-size: 15px; line-height: 1.8; background: var(--card); color: var(--ink); resize: vertical;
+}
+.capacity { margin-top: 8px; font-size: 13px; color: var(--ink-soft); }
+.capacity.over { color: var(--cinnabar); }
+.editor-right fieldset { border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); margin: 0 0 14px; padding: 12px 16px 16px; }
+.editor-right legend { font-size: 14px; padding: 0 8px; color: var(--ink-soft); letter-spacing: 1px; }
+.param { margin-bottom: 10px; }
+.param label { display: flex; justify-content: space-between; font-size: 13px; color: var(--ink-soft); margin-bottom: 4px; }
+.param output { color: var(--ink); font-variant-numeric: tabular-nums; }
+.param input[type="range"] { width: 100%; accent-color: var(--cinnabar); }
+.color-row .rgb { display: flex; gap: 8px; align-items: center; }
+.rgb input { width: 64px; padding: 8px; border: 1px solid var(--border); border-radius: 8px; background: var(--paper); color: var(--ink); }
+.swatch { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border); background: rgb(35,35,40); }
+.preset-row { display: flex; gap: 8px; margin-bottom: 8px; }
+.preset-row input { flex: 1; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--paper); color: var(--ink); }
+#presetList { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--paper); color: var(--ink); font-family: inherit; }
+
+/* ---------- 步骤 4 预览 ---------- */
+.preview-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+.preview-wrap { position: relative; text-align: center; }
+#previewImg { max-width: 100%; max-height: 76vh; border-radius: 8px; box-shadow: var(--shadow-lg); background: #fff; }
+.spinner { position: absolute; inset: 0; display: grid; place-items: center; }
+.spinner::after {
+  content: ""; width: 42px; height: 42px; border-radius: 50%;
+  border: 4px solid var(--border); border-top-color: var(--cinnabar); animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.missing-report {
+  margin-top: 14px; padding: 12px 16px; border-radius: var(--radius);
+  background: #fdf3e0; border: 1px solid #ecd9b0; color: var(--warn); font-size: 14px;
+}
+
+/* ---------- 步骤 5 导出 ---------- */
+.export-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+.export-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; }
+.export-card h3 { margin: 0 0 8px; }
+.export-card p { color: var(--ink-soft); font-size: 14px; min-height: 66px; }
+
+/* ---------- 步骤 3 工作区（编辑+预览+导出同页，一屏放下） ---------- */
+.workspace { display: grid; grid-template-columns: 400px 1fr; gap: 18px; align-items: start; }
+@media (max-width: 1020px) { .workspace { grid-template-columns: 1fr; } }
+.ws-right { position: sticky; top: 86px; }
+.panel h2 { margin-bottom: 6px; }
+.ws-hint { margin: 0 0 10px; }
+
+/* 左列紧凑化 */
+.ws-left textarea { rows: 5; }
+#textInput { min-height: 84px; max-height: 160px; padding: 8px 10px; line-height: 1.6; font-size: 14px; }
+.param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 14px; }
+.param { margin-bottom: 2px; }
+.param label { gap: 6px; margin-bottom: 0; font-size: 12.5px; }
+.param input[type="range"] { height: 16px; }
+fieldset { padding: 6px 12px 8px !important; margin-bottom: 8px !important; }
+.ws-right .btn { padding: 8px 16px; }
+.capacity { margin-top: 4px; font-size: 12.5px; }
+.preview-bar { margin-bottom: 8px; }
+.missing-report { margin-top: 8px; padding: 8px 12px; font-size: 13px; }
+
+/* ---------- 隐式注释（悬停/聚焦显示） ---------- */
+.tip {
+  position: relative; display: inline-flex; align-items: center; justify-content: center;
+  width: 16px; height: 16px; margin-left: 2px; border-radius: 50%;
+  background: var(--paper-2); color: var(--ink-soft);
+  font-size: 11px; font-style: normal; cursor: help; user-select: none;
+  border: 1px solid var(--border);
+}
+.tip::after {
+  content: attr(data-tip);
+  position: absolute; left: 50%; bottom: 135%; transform: translateX(-50%);
+  background: var(--ink); color: var(--paper);
+  padding: 8px 12px; border-radius: 8px; font-size: 12.5px; line-height: 1.6;
+  width: max-content; max-width: 270px; white-space: normal;
+  opacity: 0; pointer-events: none; transition: opacity .15s ease;
+  box-shadow: var(--shadow-lg); z-index: 60; font-family: inherit;
+}
+.tip:hover::after, .tip:focus::after { opacity: 1; }
+.tip.right::after { left: auto; right: -6px; transform: none; }
+
+.preview-empty {
+  padding: 46px 20px; text-align: center; color: var(--ink-soft);
+  background: var(--card); border: 2px dashed var(--border); border-radius: var(--radius);
+  font-size: 15px; line-height: 2;
+}
+#previewImg { max-height: calc(100vh - 340px); }
+.export-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+.page-nav { display: inline-flex; align-items: center; gap: 6px; }
+.page-btn { padding: 6px 12px; font-size: 13px; }
+.field-check label { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ink-soft); cursor: pointer; }
+.annot-toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.annot-toolbar .btn { padding: 7px 10px; font-size: 13px; }
+.annot-layout { display: grid; grid-template-columns: 300px 1fr; gap: 16px; align-items: start; }
+@media (max-width: 900px) { .annot-layout { grid-template-columns: 1fr; } }
+.annot-side { display: flex; flex-direction: column; gap: 8px; }
+.annot-side .field input { width: 100%; }
+.field-row { display: flex; gap: 8px; }
+.field-row .field { flex: 1; }
+.annot-side .btn-primary { width: 100%; }
+.annot-side .field label { font-size: 12px; display: flex; align-items: center; gap: 6px; justify-content: flex-start; }
+.annot-side .field label .tip { margin-left: 0; }
+.field-check label { white-space: nowrap; }
+.field-check input[type="checkbox"] { width: auto !important; flex: 0 0 auto; }
+.field-mode .mode-row { display: flex; flex-direction: column; gap: 4px; }
+.field-mode label.radio { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ink-soft); cursor: pointer; }
+.field-mode label.radio input { width: auto !important; flex: 0 0 auto; }
+#annotCanvas { max-height: 74vh; }
+
+/* ---------- 步骤导航 ---------- */
+.step-nav { position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: center; gap: 14px; padding: 14px; background: linear-gradient(transparent, var(--paper) 40%); }
+body[data-step="3"] .step-nav { display: none; }   /* 末步工作区一屏呈现，无需导航 */
+body[data-step="3"] main { padding-bottom: 16px; }
+
+/* ---------- Toast ---------- */
+.toast {
+  position: fixed; top: 74px; left: 50%; transform: translateX(-50%);
+  background: var(--ink); color: var(--paper); padding: 10px 22px; border-radius: 999px;
+  font-size: 14px; box-shadow: var(--shadow-lg); z-index: 100; max-width: 86vw;
+}
+.toast.err { background: var(--cinnabar-dark); }

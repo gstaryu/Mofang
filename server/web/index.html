@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>墨仿 Mofang — 手写模拟打印工具</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>墨</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/web/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">墨</span>
+    <div>
+      <h1>墨仿 <span class="en">Mofang</span></h1>
+      <p class="tagline">打印代替手写 · 仅供学习交流</p>
+    </div>
+  </div>
+  <nav class="steps" aria-label="流程步骤">
+    <button class="step" data-step="1"><i>1</i>模板</button>
+    <button class="step" data-step="2"><i>2</i>字体</button>
+    <button class="step" data-step="3"><i>3</i>编辑 · 预览 · 导出</button>
+  </nav>
+</header>
+
+<main>
+  <!-- ========== 步骤 1：模板 ========== -->
+  <section class="panel" id="panel-1" hidden>
+    <h2>选择稿纸模板</h2>
+    <p class="hint" style="margin:0 0 10px">点击卡片选用；悬停卡片可「调整」或删除；<b>双击名称可重命名</b>。上传后无需手动保存——点「下一步」会自动保存并选用。</p>
+    <div class="tpl-grid" id="tplGrid" role="list"></div>
+    <div class="row-actions">
+      <label class="btn btn-ghost">
+        <input type="file" id="tplUpload" accept=".jpg,.jpeg,.png,.webp,.bmp" hidden>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+        上传新模板
+      </label>
+    </div>
+
+    <div id="annotator" class="annotator" hidden>
+      <h3>标注书写区域
+        <small id="annModeTip">上传后自动视觉定位；也可切换手动四角标注</small>
+      </h3>
+      <div class="annot-layout">
+        <div class="annot-side">
+          <div class="annot-toolbar">
+            <button class="btn btn-ghost" id="annAuto">重新自动检测</button>
+            <button class="btn btn-ghost" id="annManualBtn">手动四角模式</button>
+          </div>
+          <span class="hint" id="annDetectMsg"></span>
+          <div class="field field-check">
+            <label for="annSkipFirst"><input type="checkbox" id="annSkipFirst" checked>
+              <span>跳过第一条线</span>
+              <i class="tip" tabindex="0" data-tip="勾选后第一行字写在第 1、2 条横线之间（符合通常书写习惯，页首线留空）"></i></label>
+          </div>
+          <div class="field field-mode">
+            <label>行线来源</label>
+            <div class="mode-row">
+              <label class="radio"><input type="radio" name="annLineMode" value="detected" checked>
+                <span>贴合检测线</span><i class="tip" tabindex="0" data-tip="使用自动检测到的真实横线（上下边界只做筛选）。检测准确时选这个"></i></label>
+              <label class="radio"><input type="radio" name="annLineMode" value="uniform">
+                <span>均匀生成</span><i class="tip" tabindex="0" data-tip="在上下边界之间按行数等距生成行线，不依赖检测。自动检测不准时选这个，配合四个边界+行数手工对齐"></i></label>
+            </div>
+          </div>
+          <div class="field"><label for="annRows">行数 <i class="tip" tabindex="0" data-tip="书写行数，默认为检测数量。贴合检测线模式=从上往下截取（只能减少）；均匀生成模式=上/下边界间等距生成（可增可减）"></i></label>
+            <input type="number" id="annRows" min="1" max="200"></div>
+          <div class="field"><label for="annTop">上边界(px) <i class="tip" tabindex="0" data-tip="第一行字的书写基线 y 坐标。调大=首行下移；调小=首行上移（可恢复被跳过的页首线）"></i></label>
+            <input type="number" id="annTop" min="0" step="1"></div>
+          <div class="field"><label for="annBottom">下边界(px) <i class="tip" tabindex="0" data-tip="最后一行字的书写基线 y 坐标。调小=末行上移（避免压页脚）；调大=末行下移"></i></label>
+            <input type="number" id="annBottom" min="0" step="1"></div>
+          <div class="field"><label for="annXl">左边界(px) <i class="tip" tabindex="0" data-tip="书写区左边界像素坐标。调小=左边留白更少"></i></label>
+            <input type="number" id="annXl" min="0" step="1"></div>
+          <div class="field"><label for="annXr">右边界(px) <i class="tip" tabindex="0" data-tip="书写区右边界像素坐标。调大=右边留白更少"></i></label>
+            <input type="number" id="annXr" min="0" step="1"></div>
+          <div class="field"><label for="annPitch">行距(px) <i class="tip" tabindex="0" data-tip="手动模式的行间距。自动检测成功后行距按真实横线逐行贴合，此值仅作显示"></i></label>
+            <input type="number" id="annPitch" min="5" step="1"></div>
+          <div class="field"><label for="annName">模板名称</label><input type="text" id="annName" placeholder="例：A4方格本"></div>
+          <div class="field-row">
+            <div class="field"><label for="annW">纸宽(mm) <i class="tip" tabindex="0" data-tip="稿纸实际物理宽度，决定导出 PDF 页面尺寸与打印对齐。A4=210"></i></label>
+              <input type="number" id="annW" value="210" step="0.1"></div>
+            <div class="field"><label for="annH">纸高(mm) <i class="tip" tabindex="0" data-tip="稿纸实际物理高度，决定导出 PDF 页面尺寸与打印对齐。A4=297"></i></label>
+              <input type="number" id="annH" value="297" step="0.1"></div>
+          </div>
+          <button class="btn btn-primary" id="annSave">保存模板</button>
+        </div>
+        <div class="annot-canvas-wrap">
+          <canvas id="annotCanvas"></canvas>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 步骤 2：字体 ========== -->
+  <section class="panel" id="panel-2" hidden>
+    <h2>选择手写字体</h2>
+    <div class="font-grid" id="fontGrid" role="list"></div>
+    <div class="row-actions">
+      <label class="btn btn-ghost">
+        <input type="file" id="fontUpload" accept=".ttf,.otf,.ttc" hidden>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+        导入字体文件
+      </label>
+      <span class="hint" id="fontHint"></span>
+    </div>
+  </section>
+
+  <!-- ========== 步骤 3：编辑 · 预览 · 导出（同一工作页） ========== -->
+  <section class="panel" id="panel-3" hidden>
+    <h2>编辑 · 预览 · 导出</h2>
+    <p class="hint">修改文字或参数后，点「生成预览」即可在此看到效果；满意后直接导出。</p>
+    <div class="workspace">
+      <div class="ws-left">
+                <label for="textInput">待处理文本</label>
+        <textarea id="textInput" rows="5" placeholder="在此粘贴或输入需要“手写”的文字……"></textarea>
+        <div class="capacity" id="capacityInfo" aria-live="polite"></div>
+
+        <fieldset>
+          <legend>外观</legend>
+          <div class="param-grid">
+            <div class="param"><label for="pSize">字体大小 <output id="oSize">0.50</output><i class="tip" tabindex="0" data-tip="字高占行高的比例。越大字越大、每行能写的字越少；太大顶到上下横线，太小显得拘谨。"></i></label>
+              <input type="range" id="pSize" min="0.3" max="1.2" step="0.02" value="0.5"></div>
+            <div class="param"><label for="pBold">笔画加粗 <output id="oBold">1</output><i class="tip" tabindex="0" data-tip="笔画加粗程度，越大笔画越粗（模拟按压重/出墨多）。0=不加粗；细字体建议 1~2；太大笔画糊在一起。"></i></label>
+              <input type="range" id="pBold" min="0" max="3" step="1" value="1"></div>
+          </div>
+          <div class="param color-row"><label for="pR">文字 RGB <i class="tip" tabindex="0" data-tip="墨水颜色。黑色用 30,30,34（带一点灰更自然）；蓝黑钢笔 30,45,90。"></i></label>
+            <div class="rgb">
+              <input type="number" id="pR" min="0" max="255" value="30">
+              <input type="number" id="pG" min="0" max="255" value="30">
+              <input type="number" id="pB" min="0" max="255" value="34">
+              <span class="swatch" id="inkSwatch"></span>
+            </div></div>
+        </fieldset>
+        <fieldset>
+          <legend>手写感（模拟笔画变化）</legend>
+          <div class="param-grid">
+            <div class="param"><label for="pH">水平笔画位移 <output id="oH">0.05</output><i class="tip" tabindex="0" data-tip="水平笔画位移幅度，越大每字左右落笔越乱、越潦草；0=整行像尺子排的。0.03~0.08 自然。"></i></label>
+              <input type="range" id="pH" min="0" max="0.3" step="0.01" value="0.05"></div>
+            <div class="param"><label for="pV">竖直笔画位移 <output id="oV">0.05</output><i class="tip" tabindex="0" data-tip="竖直笔画位移幅度，越大每字上下落笔越不准；0=字底完全齐平。0.03~0.08 自然。"></i></label>
+              <input type="range" id="pV" min="0" max="0.3" step="0.01" value="0.05"></div>
+            <div class="param"><label for="pRot">笔画旋转 <output id="oRot">2.5°</output><i class="tip" tabindex="0" data-tip="笔画旋转幅度（度），越大字歪得越厉害、越随性；0=个个端正。2~4° 自然。"></i></label>
+              <input type="range" id="pRot" min="0" max="15" step="0.5" value="2.5"></div>
+            <div class="param"><label for="pInk">墨色浓淡 <output id="oInk">0.16</output><i class="tip" tabindex="0" data-tip="墨色浓淡差异，越大深浅反差越大、越像出墨不均的旧笔；0=每字一样深。0.1~0.25 自然。"></i></label>
+              <input type="range" id="pInk" min="0" max="0.5" step="0.02" value="0.16"></div>
+            <div class="param"><label for="pWave">行基线起伏 <output id="oWave">0.15</output><i class="tip" tabindex="0" data-tip="行基线波浪幅度，越大整行起伏越明显、行线越弯；0=每行笔直。注意：贴合横线的模板上非 0 会让文字偏离真实横线（故意写歪）。"></i></label>
+              <input type="range" id="pWave" min="0" max="1" step="0.05" value="0.15"></div>
+            <div class="param"><label for="pColGap">字水平间距 <output id="oColGap">0.00</output><i class="tip" tabindex="0" data-tip="字水平间距，越大越疏、每行字越少；负值越小越紧凑甚至轻微搭笔。直接决定每行字数，不同行高的行自动容纳不同字数。"></i></label>
+              <input type="range" id="pColGap" min="-0.4" max="0.5" step="0.02" value="0"></div>
+            <div class="param"><label for="pRowGap">字竖直间距 <output id="oRowGap">0.00</output><i class="tip" tabindex="0" data-tip="字竖直间距，越大行距越松、文字逐行向下偏离横线越多；0=精确贴合真实横线。"></i></label>
+              <input type="range" id="pRowGap" min="0" max="0.5" step="0.02" value="0"></div>
+            <div class="param"><label for="pBase">字底贴近横线 <output id="oBase">0.30</output><i class="tip" tabindex="0" data-tip="字底下移量，越大字越往下压、越贴近甚至压住下面的横线；0=居中悬空。字体自带留白导致字悬空时调大。"></i></label>
+              <input type="range" id="pBase" min="0" max="0.6" step="0.01" value="0.3"></div>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>预设 <i class="tip" tabindex="0" data-tip="把当前参数+所选模板/字体存成配置，下次一键恢复。网页版与桌面版通用。"></i></legend>
+          <div class="preset-row">
+            <input type="text" id="presetName" placeholder="预设名称">
+            <button class="btn btn-ghost" id="presetSave">保存</button>
+          </div>
+          <select id="presetList" aria-label="载入预设"><option value="">— 载入预设 —</option></select>
+        </fieldset>
+      </div>
+      <div class="ws-right">
+        <div class="preview-bar">
+          <button class="btn btn-primary" id="btnGenerate">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/></svg>
+            生成预览
+          </button>
+          <button class="btn btn-ghost" id="btnReroll">换一版</button>
+          <span class="page-nav">
+            <button class="btn btn-ghost page-btn" id="btnPrevPage" aria-label="上一页">◀</button>
+            <span id="pageLabel" class="hint">第 1 / 1 页</span>
+            <button class="btn btn-ghost page-btn" id="btnNextPage" aria-label="下一页">▶</button>
+          </span>
+          <span id="previewInfo" class="hint" aria-live="polite"></span>
+        </div>
+        <div class="preview-wrap">
+          <div class="preview-empty" id="previewEmpty">修改参数后点「生成预览」<br>效果会显示在这里</div>
+          <img id="previewImg" alt="渲染预览（第 1 页）" hidden>
+          <div class="spinner" id="previewSpinner" hidden></div>
+        </div>
+        <div class="missing-report" id="missingReport" hidden></div>
+
+        <div class="export-row">
+          <button class="btn btn-primary" id="btnExportPdf">导出 PDF</button>
+          <button class="btn btn-ghost" id="btnExportPng">导出 PNG</button>
+          <span class="hint" id="exportInfo"></span>
+        </div>
+        <p class="hint">打印提示：PDF 页面物理尺寸与模板一致，打印时请选择<b>“实际大小 / 100%”</b>。</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="step-nav">
+    <button class="btn btn-ghost" id="btnPrev">上一步</button>
+    <button class="btn btn-primary" id="btnNext">下一步</button>
+  </div>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<script src="/web/app.js"></script>
+</body>
+</html>

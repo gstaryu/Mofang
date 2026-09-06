@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.pyc
+
+# 构建产物
+build/
+dist/
+
+# 运行时生成（可重建的缓存与输出）
+data/output/
+data/templates/*.scaled*.png
+data/templates/*.deskew*.png
+data/mofang-error.log
+
+# 系统
+Thumbs.db
+.DS_Store
+tmp_font.ttf removed
+prompt.md
+
+# 字体：仅忽略 g手写作业体
+字体/g手写作业体.ttf
+data/fonts/g手写作业体.ttf
+
+# 背景：仅保留三张
+背景/*
+!背景/A4纯白.jpg
+!背景/苏州大学.png
+!背景/通用信纸.png
+
+# 构建与运行时产物
+Mofang.spec
+data/mofang-run.log
+data/mofang-error.log
+assets/icon_preview.png

@@ -1,0 +1,11 @@
+# 核心依赖（网页版 + 桌面版共用）
+pillow>=10.0
+fonttools>=4.40
+img2pdf>=0.5
+fastapi>=0.110
+uvicorn[standard]>=0.29
+python-multipart>=0.0.9
+pywebview>=5.0
+
+# 打包工具（仅打包桌面 exe 时需要）
+pyinstaller>=6.0
