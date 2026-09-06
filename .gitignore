@@ -15,7 +15,6 @@ data/mofang-error.log
 # 系统
 Thumbs.db
 .DS_Store
-tmp_font.ttf removed
 prompt.md
 
 # 字体：仅忽略 g手写作业体
@@ -33,3 +32,7 @@ Mofang.spec
 data/mofang-run.log
 data/mofang-error.log
 assets/icon_preview.png
+
+# 字体上传临时文件
+data/tmp_font.*
+data/fonts/tmp_font.*
