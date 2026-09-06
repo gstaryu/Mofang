@@ -24,12 +24,18 @@ jobs:
           pip install -r requirements.txt pyinstaller
 
       - name: Build exe (PyInstaller)
-        run: >
-          pyinstaller --noconfirm --windowed --name Mofang
-          --add-data "data;data"
-          --add-data "server/web;server/web"
-          --collect-all webview
-          desktop/main.py
+        shell: pwsh
+        run: |
+          # 定位 OpenSSL DLL（python.org Windows 安装在 DLLs/ 目录）
+          $dllsDir = python -c "import sys, os; print(os.path.join(sys.prefix, 'DLLs'))"
+          $libcrypto = (Get-ChildItem "$dllsDir/libcrypto*.dll" | Select-Object -First 1).FullName
+          $libssl = (Get-ChildItem "$dllsDir/libssl*.dll" | Select-Object -First 1).FullName
+          pyinstaller --noconfirm --windowed --name Mofang `
+            --icon desktop/icon.ico `
+            --add-data "data;data" --add-data "server/web;server/web" --add-data "desktop/icon.ico;." `
+            --collect-all webview `
+            --add-binary "$libcrypto;." --add-binary "$libssl;." `
+            --hidden-import ssl desktop/main.py
 
       - name: Pack
         shell: pwsh
