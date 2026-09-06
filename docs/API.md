@@ -100,7 +100,7 @@ Body：
 Body 同上。返回 PDF 文件流（`Content-Disposition: attachment`），页面物理尺寸=模板 mm 尺寸；`X-Mofang-Info` 同上。
 
 ### `POST /api/export/png`
-Body 同上（scale 强制 1.0）。返回第 `page`+1 页 PNG 附件。
+Body 同上（scale 强制 1.0；`save_path` 可选直存）。返回**全部页面**的 zip（`mofang_p01.png ... mofang_pNN.png`）。
 
 ## 预设
 

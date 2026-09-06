@@ -705,20 +705,38 @@ async function doExport(kind) {
   btn.disabled = true;
   $("exportInfo").textContent = "导出中…";
   try {
+    const desktop = window.pywebview && window.pywebview.api;
+    let body = { template_id: state.tplId, font_id: state.fontId, text: $("textInput").value,
+                 params: collectParams(), page: state.page };
+    if (desktop) {
+      // 桌面版：弹出“另存为”对话框，服务端直存选定路径
+      const name = kind === "pdf" ? "mofang.pdf" : "mofang_png.zip";
+      const types = kind === "pdf" ? "PDF 文件 (*.pdf)" : "ZIP 压缩包 (*.zip)";
+      const savePath = await desktop.pick_save_path(name, types);
+      if (!savePath) { $("exportInfo").textContent = ""; btn.disabled = false; return; }
+      body.save_path = savePath;
+    }
     const res = await api(`/api/export/${kind}`, {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ template_id: state.tplId, font_id: state.fontId, text: $("textInput").value, params: collectParams(), page: state.page }),
+      body: JSON.stringify(body),
     });
-    const blob = await res.blob();
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = kind === "pdf" ? "mofang.pdf" : `mofang_p${state.page + 1}.png`;
-    a.click();
-    URL.revokeObjectURL(a.href);
-    const info = JSON.parse(res.headers.get("X-Mofang-Info") || "{}");
-    $("exportInfo").textContent = `已导出 ${info.page_count ?? 1} 页。打印请选择“实际大小/100%”。`
-      + (info.overflow_chars > 0 ? `（注意：超出容量 ${info.overflow_chars} 格未渲染）` : "");
-    toast("导出完成");
+    const infoHeader = res.headers.get("X-Mofang-Info");
+    const info = JSON.parse(infoHeader || "{}");
+    if (desktop) {
+      const saved = (await res.json()).path;
+      $("exportInfo").textContent = `已保存到：${saved}`;
+      toast("导出完成");
+    } else {
+      const blob = await res.blob();
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = kind === "pdf" ? "mofang.pdf" : "mofang_png.zip";
+      a.click();
+      URL.revokeObjectURL(a.href);
+      $("exportInfo").textContent = `已导出全部 ${info.page_count ?? 1} 页 PNG（zip）。打印请选择“实际大小/100%”。`
+        + (info.overflow_chars > 0 ? `（注意：超出容量 ${info.overflow_chars} 格未渲染）` : "");
+      toast("导出完成");
+    }
   } catch (e) { toast(e.message, true); $("exportInfo").textContent = ""; }
   finally { btn.disabled = false; }
 }

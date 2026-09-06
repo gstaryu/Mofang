@@ -256,6 +256,7 @@ class RenderIn(BaseModel):
     params: dict = Field(default_factory=dict)   # RenderParams 字段
     page: int = 0                                 # 预览页码（0-based）
     scale: float = 1.0                            # 预览渲染分辨率比例（<1 快速预览）
+    save_path: str = ""                           # 非空 = 桌面版“另存为”直存该路径
 
 
 # 简单生成缓存：翻页时同一输入直接取缓存页，秒切
@@ -319,6 +320,10 @@ def api_render_preview(body: RenderIn):
 def api_export_pdf(body: RenderIn):
     gen = _generate_cached(body)
     tpl = load_template(body.template_id)
+    if body.save_path:
+        export_pdf(gen.pages, body.save_path, (tpl.physical.width_mm, tpl.physical.height_mm))
+        return {"ok": True, "path": body.save_path,
+                "info": gen.layout.to_dict()}
     out = os.path.join(OUT_DIR, f"mofang_{secrets.token_hex(3)}.pdf")
     export_pdf(gen.pages, out, (tpl.physical.width_mm, tpl.physical.height_mm))
     info = json.dumps(gen.layout.to_dict(), ensure_ascii=False)
@@ -328,13 +333,30 @@ def api_export_pdf(body: RenderIn):
 
 @app.post("/api/export/png")
 def api_export_png(body: RenderIn):
+    """导出全部页面为 zip（每页一个 PNG：mofang_p01.png ...）。"""
+    import zipfile
     gen = _generate_cached(body)
-    page = max(0, min(body.page, len(gen.pages) - 1))
-    buf = io.BytesIO()
-    gen.pages[page].save(buf, format="PNG")
     info = json.dumps(gen.layout.to_dict(), ensure_ascii=False)
-    return Response(buf.getvalue(), media_type="image/png",
-                    headers={"Content-Disposition": f"attachment; filename=mofang_p{page + 1}.png",
+
+    def png_zip() -> io.BytesIO:
+        z = io.BytesIO()
+        with zipfile.ZipFile(z, "w", zipfile.ZIP_STORED) as zf:
+            for i, pg in enumerate(gen.pages, 1):
+                b = io.BytesIO()
+                pg.save(b, format="PNG")
+                zf.writestr(f"mofang_p{i:02d}.png", b.getvalue())
+        z.seek(0)
+        return z
+
+    if body.save_path:
+        z = png_zip()
+        with open(body.save_path, "wb") as f:
+            f.write(z.getvalue())
+        return {"ok": True, "path": body.save_path, "pages": len(gen.pages),
+                "info": gen.layout.to_dict()}
+    z = png_zip()
+    return Response(z.getvalue(), media_type="application/zip",
+                    headers={"Content-Disposition": "attachment; filename=mofang_png.zip",
                              "X-Mofang-Info": info})
 
 

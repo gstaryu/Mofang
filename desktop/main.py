@@ -115,11 +115,33 @@ def main() -> None:
     except Exception:
         pass
     _set_window_icon_async("墨仿 Mofang — 手写模拟打印工具（仅供学习交流）", _icon_path())
-    webview.create_window(
+
+    class ExportBridge:
+        """暴露给前端的“另存为”对话框（桌面版导出走选定路径）。"""
+
+        def pick_save_path(self, default_name: str = "mofang.pdf",
+                           file_types: str = "") -> str | None:
+            import webview as _w
+            win = _w.windows[0]
+            result = win.create_file_dialog(
+                _w.SAVE_DIALOG, save_filename=default_name,
+                file_types=(types, "所有文件 (*.*)")) if (types := file_types) else \
+                win.create_file_dialog(_w.SAVE_DIALOG, save_filename=default_name)
+            if isinstance(result, (list, tuple)) and result:
+                return result[0]
+            return result
+
+    window = webview.create_window(
         "墨仿 Mofang — 手写模拟打印工具（仅供学习交流）",
         f"http://127.0.0.1:{port}",
         width=1280, height=860, min_size=(980, 640),
+        js_api=ExportBridge(),
     )
+    # 允许 blob 下载兜底（网页版流程在 WebView2 内的下载行为）
+    try:
+        webview.settings["ALLOW_DOWNLOADS"] = True
+    except Exception:
+        pass
     webview.start()                                # GUI 主循环（阻塞）
     # 窗口关闭后退出；daemon 线程自动结束
 

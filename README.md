@@ -7,7 +7,7 @@
 [![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.1x-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![Platform](https://img.shields.io/badge/Platform-Windows-blue)]()
-[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
+[![License](https://img.shields.io/badge/License-Apache--2.0-blue)](LICENSE)
 
 ![效果总览](docs/img/效果图.png)
 
@@ -19,11 +19,11 @@
 
 ## ✨ 核心特性
 
-- **视觉自动定位**：上传稿纸照片，投影剖面法自动检测横线与书写区边界（~0.3s）；**倾斜照片自动纠斜**——文字沿倾斜横线书写，导出仍为原角度。
+- **视觉自动定位**：上传稿纸照片，投影剖面法自动检测横线与书写区边界；**倾斜照片自动纠斜**——文字沿倾斜横线书写，导出仍为原角度。
 - **行线来源可切换**：贴合检测线（逐行贴合真实横线，拍照件行距不均也能精确对齐）/ 均匀生成（上下边界 + 行数等距造线，检测不准时手工对齐）。
 - **流式中文排版**：避头尾（行首标点挤入上一行末格）、破折号/省略号占两格、自动分页；每行字数由字号 × 字水平间距自动决定，行与行可以不同；英文/URL 按字体实测宽度整词排版。
 - **手写感模拟**：水平/竖直笔画位移、笔画旋转、字号浮动、墨色浓淡、行基线起伏、笔画加粗、字底贴近横线——全部可调、固定种子可复现，"换一版"一键重随机。
-- **实时预览**：拖动参数即时刷新低清预览（~0.1s），松手自动全分辨率精修；多页 ◀▶ 翻页。
+- **实时预览**：拖动参数即时刷新低清预览，松手自动全分辨率精修；多页 ◀▶ 翻页。
 - **打印对齐**：导出 PDF 页面物理尺寸=模板尺寸，打印选"实际大小/100%"即可与实体稿纸对齐；PNG 亦可。
 - **双端一致**：网页版（浏览器）与桌面版（pywebview 原生窗口）内嵌同一前端，功能 100% 一致；模板/字体/预设互通。
 - **预设系统**：参数 + 模板 + 字体组合一键保存/载入，双端通用。
@@ -34,10 +34,10 @@
 |---|---|
 | 核心引擎 | Python 3.11 · Pillow（逐字瓦片旋转合成）· fontTools（缺字检测）· NumPy（视觉定位） |
 | 排版 | 自研半格粒度排版引擎（避头尾禁则 / 流式字数 / 实测宽度分配） |
-| 网页版 | FastAPI + Uvicorn + 原生 HTML/CSS/JS（零构建，Canvas 标注器） |
+| 网页版 | FastAPI + Uvicorn + 原生 HTML/CSS/JS |
 | 桌面版 | pywebview（WebView2）原生窗口内嵌网页版前端 |
 | 导出 | img2pdf（无损嵌入，物理尺寸精确） |
-| 打包 | PyInstaller + GitHub Actions（tag 自动构建发布） |
+| 打包 | PyInstaller + GitHub Actions |
 
 ---
 
@@ -120,17 +120,6 @@ python desktop/main.py                         # 桌面版（pywebview 窗口）
 
 ---
 
-## 🏷 版本发布
-
-推送 tag 自动构建 Windows 免安装包并发布到 Release：
-
-```bash
-git tag v0.1.0
-git push origin v0.1.0
-```
-
----
-
 ## 📚 文档索引
 
 | 文档 | 内容 |
@@ -144,3 +133,7 @@ git push origin v0.1.0
 ## ⚠️ 免责声明
 
 本项目仅供学习交流。请勿用于提交作业、实验报告等需要真实手写的场合，使用本项目产生的一切后果由使用者自行承担。
+
+## 📄 许可证
+
+[Apache License 2.0](LICENSE)
